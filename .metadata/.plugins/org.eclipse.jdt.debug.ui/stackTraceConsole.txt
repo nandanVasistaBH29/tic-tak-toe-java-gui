@@ -1,0 +1,7 @@
+int dialog =JOptionPane.showConfirmDialog(button_panel, "new game", "Result", JOptionPane.DEFAULT_OPTION);
+		
+		if (dialog == JOptionPane.OK_OPTION)
+		{
+			TicTakToe window = new TicTakToe();
+			window.frame.setVisible(true);
+		}

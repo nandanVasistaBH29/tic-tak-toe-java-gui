@@ -1,0 +1,303 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.util.Random;
+
+public class TicTakToe implements ActionListener {
+	Random random = new Random();
+	JFrame frame = new JFrame("X-O-X");
+	JPanel title_panel = new JPanel();
+	JPanel button_panel = new JPanel();
+	JLabel textfield = new JLabel();
+//	we need array of 9 size whose each element is a JButton
+	JButton[] buttons = new JButton[9];
+	boolean player1_turn, computerActive;
+
+// if we have computer is set to active then player one is the user and player 2 is the computer
+	TicTakToe() {
+		computerActive = false;
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setSize(800, 800);
+		frame.getContentPane().setBackground(new Color(50, 50, 50));
+		frame.setLayout(new BorderLayout());
+		frame.setVisible(true);
+
+		final JMenuBar tableMenuBar = createTableMenuBar();
+		this.frame.setJMenuBar(tableMenuBar);
+
+		textfield.setBackground(new Color(25, 25, 25));
+		textfield.setForeground(new Color(25, 255, 0));
+		textfield.setFont(new Font("Ink Free", Font.BOLD, 75));
+		textfield.setHorizontalAlignment(JLabel.CENTER);
+		textfield.setText("Tic-Tak-Toe");
+		textfield.setOpaque(true);
+
+		title_panel.setLayout(new BorderLayout());
+		title_panel.setBounds(0, 0, 800, 100);
+
+		button_panel.setLayout(new GridLayout(3, 3));
+		button_panel.setBackground(new Color(150, 150, 150));
+
+		for (int i = 0; i < 9; i++) {
+			buttons[i] = new JButton();
+			button_panel.add(buttons[i]);
+			buttons[i].setFont(new Font("MV BOLI", Font.BOLD, 120));
+			buttons[i].setFocusable(false);
+			buttons[i].addActionListener(this);
+		}
+		title_panel.add(textfield);
+		frame.add(title_panel, BorderLayout.NORTH);
+		frame.add(button_panel);
+		this.firstTurn();
+	}
+
+	private JMenuBar createTableMenuBar() {
+		final JMenuBar tableMenuBar = new JMenuBar();
+		tableMenuBar.add(createFileMenu());
+		return tableMenuBar;
+	}
+
+	private JMenu createFileMenu() {
+		final JMenu fileMenu = new JMenu("Options"); // <-- this is show File on top
+		final JMenuItem exitFromApp = new JMenuItem("Exit");
+		exitFromApp.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
+		fileMenu.add(exitFromApp);
+		String message;
+		if(computerActive==true) {
+			//switch it back to 2 player
+			message="2 Players";
+		}else message="Play With Computer";
+		final JMenuItem playWithComputer = new JMenuItem(message);
+		playWithComputer.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				computerActive = !computerActive;
+				firstTurn();
+			}
+		});
+		fileMenu.add(playWithComputer);
+		return fileMenu;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		for (int i = 0; i < 9; i++) {
+			if (e.getSource() == buttons[i]) {
+				if (player1_turn) {
+					if (buttons[i].getText() == "") {
+						buttons[i].setForeground(new Color(255, 0, 0));
+						buttons[i].setText("X");
+						player1_turn = false;
+						textfield.setText("O Turn");
+						this.check();
+					}
+					if (this.computerActive) {
+						// player2 is the computer
+						boolean markedByPC = false;
+						while (!markedByPC) {
+							int index = this.random.nextInt(9);
+							if (buttons[index].getText() == "") {
+								try {
+									Thread.sleep(10000);
+								} catch (InterruptedException e1) {
+									e1.printStackTrace();
+								}
+								buttons[index].setForeground(new Color(0, 0, 255));
+								buttons[index].setText("O");
+								player1_turn = true;
+								textfield.setText("X Turn");
+								this.check();
+								markedByPC = true;
+							}
+						}
+					}
+				} else {
+					if (buttons[i].getText() == "") {
+						buttons[i].setForeground(new Color(0, 0, 255));
+						buttons[i].setText("O");
+						player1_turn = true;
+						textfield.setText("X Turn");
+						this.check();
+					}
+				}
+			}
+		}
+
+	}
+
+	public void firstTurn() {
+		for (int i = 0; i < 9; i++) {
+			buttons[i].setEnabled(false);
+			buttons[i].setText("");
+		}
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		textfield.setText("Loading....");
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+
+			e.printStackTrace();
+		}
+
+		for (int i = 0; i < 9; i++) {
+			buttons[i].setEnabled(true);
+		}
+		if (this.computerActive) {
+			player1_turn = true;
+			textfield.setText("X Turn");
+			return;
+		}
+		if ((int) random.nextInt(2) == 0) {
+			player1_turn = true;
+			textfield.setText("X Turn");
+		} else {
+			player1_turn = false;
+			textfield.setText("O Turn");
+		}
+	}
+
+	public void check() {
+		// X win
+		if ((buttons[0].getText() == "X") && (buttons[1].getText() == "X") && (buttons[2].getText() == "X")) {
+			this.xWins(0, 1, 2);
+		}
+		if ((buttons[3].getText() == "X") && (buttons[4].getText() == "X") && (buttons[5].getText() == "X")) {
+			this.xWins(3, 4, 5);
+		}
+		if ((buttons[6].getText() == "X") && (buttons[7].getText() == "X") && (buttons[8].getText() == "X")) {
+			this.xWins(6, 7, 8);
+		}
+		// cols
+		if ((buttons[0].getText() == "X") && (buttons[3].getText() == "X") && (buttons[6].getText() == "X")) {
+			this.xWins(0, 3, 6);
+		}
+		if ((buttons[1].getText() == "X") && (buttons[4].getText() == "X") && (buttons[7].getText() == "X")) {
+			this.xWins(1, 4, 7);
+		}
+		if ((buttons[2].getText() == "X") && (buttons[5].getText() == "X") && (buttons[8].getText() == "X")) {
+			this.xWins(2, 5, 8);
+		}
+		// dia
+		if ((buttons[0].getText() == "X") && (buttons[4].getText() == "X") && (buttons[8].getText() == "X")) {
+			this.xWins(0, 4, 8);
+		}
+		if ((buttons[2].getText() == "X") && (buttons[4].getText() == "X") && (buttons[6].getText() == "X")) {
+			this.xWins(2, 4, 6);
+		}
+
+		// O win
+		if ((buttons[0].getText() == "O") && (buttons[1].getText() == "O") && (buttons[2].getText() == "O")) {
+			this.oWins(0, 1, 2);
+		}
+		if ((buttons[3].getText() == "O") && (buttons[4].getText() == "O") && (buttons[5].getText() == "O")) {
+			this.oWins(3, 4, 5);
+		}
+		if ((buttons[6].getText() == "O") && (buttons[7].getText() == "O") && (buttons[8].getText() == "O")) {
+			this.oWins(6, 7, 8);
+		}
+		// cols
+		if ((buttons[0].getText() == "O") && (buttons[3].getText() == "O") && (buttons[6].getText() == "O")) {
+			this.oWins(0, 3, 6);
+		}
+		if ((buttons[1].getText() == "O") && (buttons[4].getText() == "O") && (buttons[7].getText() == "O")) {
+			this.oWins(1, 4, 7);
+		}
+		if ((buttons[2].getText() == "O") && (buttons[5].getText() == "O") && (buttons[8].getText() == "O")) {
+			this.oWins(2, 5, 8);
+		}
+		// dia
+		if ((buttons[0].getText() == "O") && (buttons[4].getText() == "O") && (buttons[8].getText() == "O")) {
+			this.oWins(0, 4, 8);
+		}
+		if ((buttons[2].getText() == "O") && (buttons[4].getText() == "O") && (buttons[6].getText() == "O")) {
+			this.oWins(2, 4, 6);
+		}
+
+		// Draw
+		this.checkDraw();
+
+	}
+
+	private void checkDraw() {
+		for(int i=0;i<9;i++) {
+			if(buttons[i].getText()=="")return;
+		}
+		textfield.setText("Draw 🤬");
+		int dialog = JOptionPane.showConfirmDialog(button_panel, "new game", "Result", JOptionPane.DEFAULT_OPTION,
+				JOptionPane.CANCEL_OPTION);
+
+		if (dialog == JOptionPane.OK_OPTION) {
+			textfield.setText("Restarting...");
+			for (int i = 0; i < 9; i++) {
+				buttons[i].setText("");
+			}
+			for (int i = 0; i < 9; i++) {
+				buttons[i].setEnabled(true);
+			}
+			this.firstTurn();
+
+		}
+	}
+
+	public void xWins(int a, int b, int c) {
+		System.out.println(a+" "+b+" "+c );
+		buttons[a].setBackground(Color.green);
+		buttons[b].setBackground(Color.green);
+		buttons[c].setBackground(Color.green);
+
+		for (int i = 0; i < 9; i++) {
+			buttons[i].setEnabled(false);
+		}
+		textfield.setText("X Wins 🥳");
+		int dialog = JOptionPane.showConfirmDialog(button_panel, "new game", "Result", JOptionPane.DEFAULT_OPTION,
+				JOptionPane.CANCEL_OPTION);
+
+		if (dialog == JOptionPane.OK_OPTION) {
+			textfield.setText("Restarting...");
+			for (int i = 0; i < 9; i++) {
+				buttons[i].setText("");
+			}
+			for (int i = 0; i < 9; i++) {
+				buttons[i].setEnabled(true);
+			}
+			this.firstTurn();
+		}
+	}
+
+	public void oWins(int a, int b, int c) {
+		System.out.println(a+" "+b+" "+c );
+		buttons[a].setBackground(Color.green);
+		buttons[b].setBackground(Color.green);
+		buttons[c].setBackground(Color.green);
+		for (int i = 0; i < 9; i++) {
+			buttons[i].setEnabled(false);
+		}
+		if (this.computerActive)
+			textfield.setText("O Wins 😡");
+		else
+			textfield.setText("O Wins 🎉");
+		int dialog = JOptionPane.showConfirmDialog(button_panel, "new game", "Result", JOptionPane.DEFAULT_OPTION,
+				JOptionPane.CANCEL_OPTION);
+
+		if (dialog == JOptionPane.OK_OPTION) {
+			textfield.setText("Restarting...");
+			for (int i = 0; i < 9; i++) {
+				buttons[i].setText("");
+			}
+			for (int i = 0; i < 9; i++) {
+				buttons[i].setEnabled(true);
+			}
+			this.firstTurn();
+		}
+	}
+
+}
